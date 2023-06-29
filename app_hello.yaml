@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+spec:
+  selector:
+    matchLabels:
+      app1: app1
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app1: app1
+    spec:
+      containers:
+      - name: app1
+        image: iad.ocir.io/gc35013/flask-apps/python-hello-app:latest
+        imagePullPolicy: Always
+        ports:
+        - name: app1
+          containerPort: 5000
+          protocol: TCP
+      imagePullSecrets:
+        - name: ocirsecret1 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1-lb
+  labels:
+    app1: app1
+  annotations:
+    service.beta.kubernetes.io/oci-load-balancer-shape: "flexible"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-min: "1"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-max: "10"
+    service.beta.kubernetes.io/oci-load-balancer-subnet1: "ocid1.subnet.oc1.iad.aaaaaaaatrqxpdaz2peocawgjrz75mvkbbtei67mjq6tki5cdghjokh64ozq"
+spec:
+  type: LoadBalancer 
+  ports:
+  - port: 5000
+  selector:
+    app1: app1
